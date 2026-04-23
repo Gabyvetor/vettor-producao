@@ -462,7 +462,7 @@ body.pdf-export .card-foto input[type="range"] {
 </div>
 
 
-<script>
+<script type="module">
     let elementoSelecionado = null;
 
     document.addEventListener('click', function(e) {
@@ -743,6 +743,7 @@ function restaurarElementosDoPDF() {
 
 
 function salvarPDF() {
+	salvarNoBanco();
     converterTudoParaMaiusculoNoPDF();
     atualizarExibicao();
 
@@ -861,8 +862,43 @@ function converterTudoParaMaiusculoNoPDF() {
 }
 
 document.addEventListener('DOMContentLoaded', forcarMaiusculoSempre);
+	
+// FIREBASE AQUI
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyC0YaL9Fb9Z7gmUvvCP9KekLyBpTmaAHhQ",
+  authDomain: "vettor-app.firebaseapp.com",
+  projectId: "vettor-app",
+  storageBucket: "vettor-app.firebasestorage.app",
+  messagingSenderId: "833679689475",
+  appId: "1:833679689475:web:b7ceb62ce14ab9b9b28b36"
+};
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+async function salvarNoBanco() {
+    try {
+        await addDoc(collection(db, "ordens_producao"), {
+            cliente: document.querySelector('.cv-row input')?.value || "",
+            vendedor: document.querySelectorAll('.cv-row input')[1]?.value || "",
+            numeroOrdem: document.querySelector('.info-box-new input')?.value || "",
+            dataPedido: document.getElementById('dataPedido')?.value || "",
+            dataEntrega: document.getElementById('dataEntrega')?.value || "",
+            observacoes: document.getElementById('obsGerais')?.value || "",
+            criadoEm: new Date()
+        });
+
+        console.log("Salvo no Firebase com sucesso");
+    } catch (erro) {
+        console.error("Erro ao salvar:", erro);
+    }
+}
 </script>
 </body>
 </html>
