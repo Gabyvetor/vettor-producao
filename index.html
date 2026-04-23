@@ -151,7 +151,11 @@ window.login = async function () {
 
 
 window.esqueciSenha = async function () {
-    const usuario = document.getElementById("usuario").value.trim().toUpperCase();
+    const usuario = document.getElementById("usuario")
+    .value
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "");
 
     if (!usuario) {
         alert("Digite seu usuário primeiro");
