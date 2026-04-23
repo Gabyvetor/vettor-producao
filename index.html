@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Ordem de Produção - VETTOR</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+
+	@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+
+        * { box-sizing: border-box; font-family: Arial, sans-serif; margin: 0; padding: 0; text-transform: uppercase ; }
+
+	body { background-color: #333; padding: 5px; }
+
+body.pdf-export .card-foto input[type="range"] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+        .toolbar { background: #000; padding: 6px; width: 210mm; display: flex; justify-content: center; gap: 10px; margin: 0 auto 5px auto; border-radius: 5px; }
+
+        .page { width: 210mm; min-height: 296mm; padding: 4mm; margin: 0 auto; background: white; display: flex; flex-direction: column; position: relative; }
+        
+        .header-new { display: flex; gap: 3px; margin-bottom: 3px; align-items: flex-start; }
+
+        .pacote-container { width: 62%; border: 1px solid #999; border-radius: 3px; overflow: hidden; }
+
+	.pacote-header { background-color: #000000; color: #fff; font-weight: bold; font-size: 16px; font-family: Arial, sans-serif; text-transform: uppercase; text-align: center; padding: 5px 0; letter-spacing: 2px; }   
+     
+        .pacote-options { display: flex; padding: 6px; gap: 6px; justify-content: center; align-items: center; border-bottom: 1px solid #000; }
+
+        .pacote-options label { font-weight: bold; font-size: 12px; color: #000; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+        
+        .pacote-options input[type="checkbox"], .tipo-peca-check {width: 16px; height: 16px; cursor: pointer; -webkit-appearance: none; appearance: none; border: 1px solid #000; background-color: #fff; position: relative; vertical-align: middle; }
+
+        .pacote-options input[type="checkbox"]:checked::after, .tipo-peca-check:checked::after {content: 'X'; position: absolute; top: -2px; left: 2px; font-size: 10px; font-weight: bold; color: #000; }
+
+        .input-premium { border:none; border-bottom:1px solid #999; flex: 1; min-width: 50px; outline:none; font-size: 13px; font-weight: bold; color: #000; }
+
+        .cliente-vendedor { padding: 10px; background-color: #f9f9f9; display: flex; gap: 10px; }
+
+        .cv-row { display: flex; align-items: center; font-size: 12px; font-weight: bold; gap: 5px; flex: 1; }
+
+        .cv-row input { border: none; border-bottom: 1px solid #999; width: 100%; padding: 2px 0; outline: none; background: transparent; font-weight: bold; font-size: 13px; text-transform: uppercase; }
+
+        .info-container { width: 40%; display: flex; flex-direction: column; gap: 3px; }
+
+        .info-top-row { display: flex; gap: 3px; }
+
+        .info-box-new { background-color: #E6E7E8; border: 1px solid #999; border-radius: 3px; padding: 4px; text-align: center; flex: 1; }
+
+        .info-box-new b { display: block; font-size: 16px; text-transform: uppercase; margin-bottom: 2px; }
+
+        .info-box-new input { width: 100%; border: none; border-bottom: 1px solid #999; background: transparent; text-align: center; outline: none; font-size: 16px; font-weight: bold; }
+        
+        .date-box-new { border-radius: 3px; padding: 4px; text-align: center; border: 1px solid #999; }
+
+        .date-box-new b { display: block; font-size: 12px; text-transform: uppercase; margin-bottom: 2px; }
+
+        .date-box-new input { width: 100%; border: none; border-bottom: 1px solid #999; background: transparent; text-align: center; outline: none; font-size: 14px; font-weight: bold; }
+        
+        .box-pedido { background-color: #E6E7E8; border-color: #999; }
+
+        .box-entrega { background-color: #aee9fd; border-color: #999; color: #000000; }
+
+        .box-entrega b, .box-entrega input { color: #000000; border-color: #999; }
+
+        .date-br-display { display: none; font-weight: bold; font-size: 14px; text-align: center; width: 100%; padding: 2px 0; }
+
+        .content { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+
+        /* NOVA ESTRUTURA DE LAYOUT DIVIDIDO */
+        .col-grades { width: 100%; }
+        
+        .bottom-area { display: flex; gap: 6px; flex: 1; align-items: stretch; }
+
+        .photo-area { 
+    flex: 1; /* Ocupa a esquerda (Área Vermelha) */
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 6px; 
+    align-content: flex-start;
+    border: 1px solid #ccc; /* Delimita visualmente a área de fotos */
+    padding: 4px;
+    overflow: hidden;
+    position: relative;}
+
+	.col-specs {
+ 	    width: 28%; /* Ocupa a direita (Área Azul) */
+ 	    background: #F2F2F2;
+ 	    padding: 4px;
+ 	    border-radius: 1px;
+	    display: flex;
+	    flex-direction: column;        }
+
+     	.col-grades > table {width: 100%;}	
+
+	    .col-grades td, .col-grades td input {font-family: 'Roboto Condensed', sans-serif; }
+
+	    .section-header {margin-top: 6px;}
+
+	    .spec-item {margin-bottom: 4px;}
+
+        .tab-title-row { display: flex; align-items: center; justify-content: space-between; margin: 3px 0 2px 0; }
+   
+	    .tab-title { font-weight: bold; font-size: 10px; font-family: Arial, sans-serif; text-transform: uppercase;}
+
+	    .check-label { font-size: 10px; font-family: Arial, sans-serif; font-weight: bold;}
+
+	    table { width: 100%; border-collapse: collapse; margin-bottom: 3px; table-layout: fixed; }
+
+	    td { border: 0.3px solid transparent; padding: 0; text-align: center; font-size: 10px; font-weight: bold;}
+
+        /* SOMENTE NAS TABELAS DE GRADE DOS TAMANHOS */
+	    .col-grades table td { border-color: #999;}
+
+        /* inputs ocupando corretamente o espaço */
+	    td input { width: 100%; border: none; text-align: center; font-weight: bold; outline: none; background: transparent; font-size: 12px;}
+
+        /* opcional: primeira coluna menor (TAM / QTD) */
+	    td:first-child { width: 23px;}
+	    td:last-child {background-color: #e0e0e0; font-weight: bold;}
+
+        .azul { background: #AEE2F5; } .rosa { background: #F7C6CF; }
+
+        .punho-container { display: flex; flex-direction: column; gap: 1px; margin: 2px 0; }
+
+        .punho-wrapper { display: flex; align-items: center; gap: 1px; padding: 1px 0; }
+
+        .punho-moldura { border: 1px solid #999; width: 120px; height: 24px; background: #fff; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; outline: none; }
+
+        .punho-moldura img { width: 100%; height: 100%; object-fit: fill; display: none; }
+
+        .punho-moldura span { font-size: 8px; color: #999; }
+
+        .del-punho { position: absolute; top: 0; right: 0; background: red; color: white; border: none; font-size: 8px; cursor: pointer; padding: 0 2px; display: none; z-index: 5; }
+
+        .spec-item { border-bottom: 1px solid #999; margin-bottom: 2px; display: flex; font-size: 10px; font-family: 'Roboto Condensed'; font-weight: bold; padding-bottom: 1px; align-items: center; }
+
+        .spec-item input { border: none; background: transparent; outline: none; flex: 1; padding-left: 4px; font-size: 10px; height: 1.2em; }
+
+        .section-header { background: #999; color: 000; text-align: center; font-weight: bold; margin: 2px 0 3px 0; font-size: 10px; text-transform: uppercase;}
+
+.card-foto {
+    border: 1px solid #ddd;
+    padding: 3px;
+    position: relative;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    outline: none;
+    max-width: 100%;
+    overflow: hidden;}
+
+.card-foto img {
+    width: 250px;
+    height: auto;
+    display: block;
+    max-width: 100%;
+    object-fit: contain;}
+
+        .btn-remove { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; border: none; width: 20px; height: 20px; cursor: pointer; z-index: 10; display: none !important; }
+
+        .card-foto input[type="range"] { opacity: 1 !important; width: 100%; height: 10px; cursor: ew-resize; margin-top: 3px; }
+
+        .footer-verde { background: #00A859; color: white; padding: 1px 2px; font-weight: bold; font-style: italic; margin-top: auto; }
+
+        #obsGerais,
+	#obsGeraisPrint {
+    	width: 100%;
+    	min-height: 50px;
+    	border: 1px solid #ccc;
+    	background: #E6E7E8;
+    	outline: none;
+    	font-size: 14px;
+    	padding: 4px;
+    	line-height: 1.1;
+    	margin: 2px 0;
+    	box-sizing: border-box;
+    	white-space: pre-wrap;
+    	word-wrap: break-word;
+    	overflow-wrap: break-word;
+    	text-transform: uppercase;}
+
+	#obsGerais {
+    	flex: 1;
+    	resize: none;
+    	overflow: hidden;
+    	display: block;}
+
+	#obsGeraisPrint {
+    	display: none;
+    	overflow: hidden;}
+
+        @media print { 
+
+		/* GARANTE QUE O FORMATO BR APAREÇA */
+    		.date-br-display {display: block !important;}
+
+ 		/* ESCONDE COMPLETAMENTE O INPUT ORIGINAL */
+ 		.date-box-new input[type="date"] {
+    			opacity: 0 !important;
+    			visibility: hidden !important;
+    			position: absolute !important;
+    			pointer-events: none !important;}
+		
+		.toolbar, 
+		.no-print, input[type="range"], 
+		.del-punho { display: none !important; } 
+		.btn-remove,
+    		input[type="range"] { display: none !important; }
+		.date-br-display { display: block !important; } 
+            	input[type="date"] { display: none !important; }
+		.page { margin: 0; border: none; width: 210mm; height: 296mm; } 
+            	input, textarea, select { text-transform: uppercase !important; }
+		.photo-area { border: none; } /* Remove borda da área de fotos na impressão */
+        }
+    </style>
+</head>
+
+<body onkeydown="verificarDelete(event)">
+
+<datalist id="list-tecido-camisa">
+    <option value="DRY-FIT"></option>
+    <option value="TEXTURIZADO+DRY-FIT"></option>
+    <option value="TEXTURIZADO+MANCHESTER"></option>
+    <option value="ELASTANO"></option>
+    <option value="TEXTURIZADO"></option>
+    <option value="MANCHESTER"></option>
+    <option value="CHIMPA"></option>
+    <option value="MICROFIBRA"></option>
+</datalist>
+
+<datalist id="list-escudo-comum">
+    <option value="SUBLIMADO"></option>
+    <option value="BORDADO"></option>
+    <option value="DTF"></option>
+</datalist>
+
+<datalist id="list-gola-camisa">
+    <option value="COMUM"></option>
+    <option value="TRANSPASSADA"></option>
+    <option value="V"></option>
+    <option value="NIKE V COM VIES"></option>
+    <option value="NIKE ARGENTINA"></option>
+    <option value="NIKE 2020"></option>
+    <option value="POLO"></option>
+    <option value="PADRE"></option>
+    <option value="NIKE LIMPEZINHA"></option>
+</datalist>
+
+<datalist id="list-molde-camisa">
+    <option value="COMUM"></option>
+    <option value="NIKE V COM VIES"></option>
+    <option value="NIKE ARGENTINA"></option>
+    <option value="NIKE 2020"></option>
+    <option value="RAGLAN"></option>
+    <option value="POLO"></option>
+    <option value="NIKE LIMPEZINHA"></option>
+</datalist>
+
+<datalist id="list-tecido-calcao-comum">
+    <option value="DRY-FIT"></option>
+    <option value="MICROFIBRA"></option>
+    <option value="CHIMPA"></option>
+</datalist>
+
+<datalist id="list-molde-calcao-comum">
+    <option value="INTEIRO"></option>
+    <option value="NIKE"></option>
+    <option value="COM BOLSO"></option>
+    <option value="INTEIRO P/ TELA"></option>
+</datalist>
+
+<datalist id="list-tecido-goleiro">
+    <option value="DRY-FIT"></option>
+    <option value="TEXTURIZADO+DRY-FIT"></option>
+    <option value="TEXTURIZADO+MANCHESTER"></option>
+    <option value="ELASTANO"></option>
+    <option value="TEXTURIZADO"></option>
+    <option value="MANCHESTER"></option>
+    <option value="CHIMPA"></option>
+    <option value="MICROFIBRA"></option>
+</datalist>
+
+<datalist id="list-escudo-goleiro">
+    <option value="SUBLIMADO"></option>
+    <option value="BORDADO"></option>
+    <option value="DTF"></option>
+</datalist>
+
+<datalist id="list-gola-goleiro">
+    <option value="COMUM"></option>
+    <option value="TRANSPASSADA"></option>
+    <option value="V"></option>
+    <option value="NIKE V COM VIES"></option>
+    <option value="NIKE ARGENTINA"></option>
+    <option value="NIKE 2020"></option>
+    <option value="POLO"></option>
+    <option value="PADRE"></option>
+    <option value="NIKE LIMPEZINHA"></option>
+</datalist>
+
+<datalist id="list-molde-goleiro">
+    <option value="COMUM"></option>
+    <option value="NIKE V COM VIES"></option>
+    <option value="NIKE ARGENTINA"></option>
+    <option value="NIKE 2020"></option>
+    <option value="RAGLAN"></option>
+    <option value="POLO"></option>
+    <option value="NIKE LIMPEZINHA"></option>
+</datalist>
+
+<datalist id="list-molde-calcao-goleiro">
+    <option value="INTEIRO"></option>
+    <option value="NIKE"></option>
+    <option value="COM BOLSO"></option>
+    <option value="INTEIRO P/ TELA"></option>
+</datalist>
+
+<div class="toolbar">
+    <button onclick="document.getElementById('f-in').click()">+ ADICIONAR FOTOS</button>
+    <input type="file" id="f-in" multiple accept="image/*" style="display:none" onchange="addFoto(this)">
+    <button onclick="salvarPDF()" style="background:#00A859; color:white; border:none; padding:8px 20px; cursor:pointer; font-weight:bold; border-radius:5px;">GERAR PDF</button>
+</div>
+
+<div class="page" id="totalPage">
+    <div class="header-new">
+        <div class="pacote-container">
+            <div class="pacote-header">LINHA</div>
+            <div class="pacote-options">
+                <label>START <input type="checkbox"></label>
+                <label>STANDART <input type="checkbox"></label>
+                <label>ELITE <input type="checkbox"></label>
+                <label>PREMIUM <input type="checkbox"></label>
+                <input type="text" class="input-premium" placeholder="...">
+            </div>
+            <div class="cliente-vendedor">
+                <div class="cv-row"><label>CLIENTE:</label><input type="text"></div>
+                <div class="cv-row"><label>VENDEDOR:</label><input type="text"></div>
+            </div>
+        </div>
+        
+        <div class="info-container">
+            <div class="info-top-row">
+                <div class="info-box-new"><b>Nº ORDEM</b><input type="text"></div>
+                <div class="date-box-new box-pedido">
+                    <b>DATA DO PEDIDO</b>
+                    <input type="date" id="dataPedido" onchange="calcularDatas()">
+                    <div id="dispPedido" class="date-br-display"></div>
+                </div>
+            </div>
+            <div class="date-box-new box-entrega">
+                <b>DATA ENTREGA (<input type="number" id="prazo" value="25" style="width:30px; border:none; background:transparent; color:black; font-weight:bold;" oninput="calcularDatas()"> DIAS)</b>
+                <input type="date" id="dataEntrega" onchange="atualizarExibicao()">
+                <div id="dispEntrega" class="date-br-display"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="col-grades">
+            <div class="tab-title-row"><div class="tab-title">CAMISA MASCULINA</div></div>
+            <table>
+                <tr class="azul"><td>TAM</td><td>1</td><td>2</td><td>4</td><td>6</td><td>8</td><td>10</td><td>12</td><td>14</td><td>P</td><td>M</td><td>G</td><td>GG</td><td>XGG</td><td>EXGG</td><td>EXGG+</td><td>TOTAL</td></tr>
+                <tr class="calc-row"><td>QTD</td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="total" readonly style="color:black;"></td></tr>
+            </table>
+
+            <div class="tab-title-row">
+                <div class="tab-title">CALÇÃO MASCULINO <input type="checkbox" class="tipo-peca-check"></div>
+                <div class="check-label">BERMUDA MASCULINA <input type="checkbox" class="tipo-peca-check"></div>
+            </div>
+            <table>
+                <tr class="azul"><td>TAM</td><td>1</td><td>2</td><td>4</td><td>6</td><td>8</td><td>10</td><td>12</td><td>14</td><td>P</td><td>M</td><td>G</td><td>GG</td><td>XGG</td><td>EXGG</td><td>EXGG+</td><td>TOTAL</td></tr>
+                <tr class="calc-row"><td>QTD</td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="total" readonly style="color:black; "></td></tr>
+            </table>
+
+            <div style="display:flex; gap:8px; width:100%;">
+                <div style="flex:1">
+                    <div class="tab-title">CAMISA FEMININA</div>
+                    <table><tr class="rosa"><td>TAM</td><td>P</td><td>M</td><td>G</td><td>GG</td><td>XGG</td><td>TOTAL</td></tr><tr class="calc-row"><td>QTD</td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="total" readonly style="color:black;"></td></tr></table>
+                </div>
+                <div style="flex:1">
+                    <div class="tab-title">CALÇÃO FEMININO</div>
+                    <table><tr class="rosa"><td>TAM</td><td>P</td><td>M</td><td>G</td><td>GG</td><td>XGG</td><td>TOTAL</td></tr><tr class="calc-row"><td>QTD</td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="qtd"></td><td><input type="text" class="total" readonly style="color:black;"></td></tr></table>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-area">
+            
+            <div id="wrapper-fotos" class="photo-area"></div>
+
+            <div class="col-specs">
+                <div class="section-header">CAMISA</div>
+                <div class="spec-item">TECIDO:<input type="text" list="list-tecido-camisa"></div>
+                <div class="spec-item">GOLA:<input type="text" list="list-gola-camisa"></div>
+                <div class="punho-container">
+                    <div class="punho-wrapper">
+                        <span style="font-size:10px; font-weight:bold;">PUNHO:</span>
+                        <input type="text" style="width:100%; border:none; border-bottom:1px solid #999; background:transparent; outline:none; font-size:11px;">
+                    </div>
+                    <div class="punho-moldura" onclick="gerenciarCliquePunho(this, event)">
+                        <button class="del-punho" onclick="event.stopPropagation(); removePunho(this)">X</button>
+                        <span>FOTO DO PUNHO</span><img>
+                    </div>
+                    <input type="file" style="display:none" onchange="subirPunho(this)">
+                </div>
+                <div class="spec-item">TELA:<input type="text"></div>
+                <div class="spec-item">ESCUDO:<input type="text" list="list-escudo-comum"></div>
+                <div class="spec-item">MOLDE:<input type="text" list="list-molde-camisa"></div>
+
+                <div class="section-header">CALÇÃO</div>
+                <div class="spec-item">TECIDO:<input type="text" list="list-tecido-calcao-comum"></div>
+                <div class="spec-item">RECORTE:<input type="text"></div>
+                <div class="spec-item">ESCUDO:<input type="text" list="list-escudo-comum"></div>
+                <div class="spec-item">MOLDE:<input type="text" list="list-molde-calcao-comum"></div>
+
+                <div class="section-header">MEIÃO</div>
+                <div class="spec-item">JOGO:<input type="text"></div>
+                <div class="spec-item">GOL 1:<input type="text"></div>
+                <div class="spec-item">GOL 2:<input type="text"></div>
+
+                <div class="section-header">OBSERVAÇÕES GERAIS</div>
+		<textarea id="obsGerais" maxlength="420"></textarea>
+		<div id="obsGeraisPrint" aria-hidden="true"></div>
+                
+                <div class="section-header">CAMISA GOLEIRO</div>
+                <div class="spec-item">TECIDO:<input type="text" list="list-tecido-goleiro"></div>
+                <div class="spec-item">GOLA:<input type="text" list="list-gola-goleiro"></div>
+
+                <div class="punho-container">
+                    <div class="punho-wrapper">
+                        <span style="font-size:10px; font-weight:bold;">PUNHO:</span>
+                        <input type="text" style="width:100%; border:none; border-bottom:1px solid #999; background:transparent; outline:none; font-size:11px;">
+                    </div>
+                    <div class="punho-moldura" onclick="gerenciarCliquePunho(this, event)">
+                        <button class="del-punho" onclick="event.stopPropagation(); removePunho(this)">X</button>
+                        <span>FOTO DO PUNHO</span><img>
+                    </div>
+                    <input type="file" style="display:none" onchange="subirPunho(this)">
+                </div>
+                <div class="spec-item">TELA:<input type="text"></div>
+                <div class="spec-item">ESCUDO:<input type="text" list="list-escudo-goleiro"></div>
+                <div class="spec-item">MOLDE:<input type="text" list="list-molde-goleiro"></div>
+
+                <div class="section-header">CALÇÃO GOLEIRO</div>
+                <div class="spec-item">TECIDO:<input type="text" list="list-tecido-calcao-comum"></div>
+                <div class="spec-item">RECORTE:<input type="text"></div>
+                <div class="spec-item">ESCUDO:<input type="text" list="list-escudo-comum"></div>
+                <div class="spec-item">MOLDE:<input type="text" list="list-molde-calcao-goleiro"></div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-verde">Ordem de Produção - VETTOR SPORTS</div>
+</div>
+
+
+<script>
+    let elementoSelecionado = null;
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.punho-moldura') && !e.target.closest('.card-foto')) {
+            if (elementoSelecionado) {
+                elementoSelecionado.style.outline = "none";
+                elementoSelecionado = null;
+            }
+        }
+    });
+
+    function gerenciarCliquePunho(moldura, event) {
+        event.stopPropagation();
+        const img = moldura.querySelector('img');
+        if (img.style.display === 'block') { 
+            selecionarElemento(moldura); 
+        } else { 
+            moldura.nextElementSibling.click(); 
+        }
+    }
+
+    function removePunho(botao) {
+        const moldura = botao.parentElement;
+        const img = moldura.querySelector('img');
+        const span = moldura.querySelector('span');
+        
+        img.src = ''; 
+        img.style.display = 'none';
+        span.style.display = 'block';
+        botao.style.display = 'none';
+        
+        if (elementoSelecionado === moldura) {
+            elementoSelecionado.style.outline = "none";
+            elementoSelecionado = null;
+        }
+    }
+
+    function selecionarElemento(el) {
+        if (elementoSelecionado) elementoSelecionado.style.outline = "none";
+        elementoSelecionado = el;
+        elementoSelecionado.style.outline = "2px solid red";
+    }
+
+    function verificarDelete(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        if ((e.key === "Delete" || e.key === "Backspace") && elementoSelecionado) {
+            if (elementoSelecionado.classList.contains('punho-moldura')) {
+                const btn = elementoSelecionado.querySelector('.del-punho');
+                removePunho(btn);
+            } else { 
+                elementoSelecionado.remove(); 
+                elementoSelecionado = null;
+            }
+        }
+    }
+
+    function formatarBR(dataS) { if (!dataS) return ""; const p = dataS.split("-"); return p[2] + "/" + p[1] + "/" + p[0]; }
+    function atualizarExibicao() {
+        document.getElementById('dispPedido').innerText = formatarBR(document.getElementById('dataPedido').value);
+        document.getElementById('dispEntrega').innerText = formatarBR(document.getElementById('dataEntrega').value);
+    }
+    function calcularDatas() {
+        const inputPed = document.getElementById('dataPedido');
+        const inputEnt = document.getElementById('dataEntrega');
+        const prazo = parseInt(document.getElementById('prazo').value) || 0;
+        if (inputPed.value) {
+            let d = new Date(inputPed.value + 'T12:00:00');
+            d.setDate(d.getDate() + prazo);
+            inputEnt.value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+        }
+        atualizarExibicao();
+    }
+
+    document.querySelectorAll('.calc-row').forEach(row => {
+        row.addEventListener('input', () => {
+            let jTotal = 0, gTotal = 0;
+            row.querySelectorAll('.qtd').forEach(input => {
+                let v = input.value.trim();
+                if(v.includes('+')) {
+                    let partes = v.split('+');
+                    jTotal += parseFloat(partes[0]) || 0;
+                    gTotal += parseFloat(partes[1]) || 0;
+                } else { jTotal += parseFloat(v) || 0; }
+            });
+            row.querySelector('.total').value = gTotal > 0 ? jTotal + "+" + gTotal : (jTotal > 0 ? jTotal : '');
+        });
+    });
+
+    function subirPunho(input) {
+        if (input.files[0]) {
+            const reader = new FileReader();
+            const moldura = input.previousElementSibling;
+            reader.onload = e => {
+                const img = moldura.querySelector('img');
+                img.src = e.target.result; 
+                img.style.display = 'block';
+                moldura.querySelector('span').style.display = 'none';
+                moldura.querySelector('.del-punho').style.display = 'block'; 
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+        input.value = '';
+    }
+
+function addFoto(input) {
+    const cont = document.getElementById('wrapper-fotos');
+    const espacamento = 8;
+
+    function limitarPosicao(card) {
+        const areaLargura = cont.clientWidth;
+        const areaAltura = cont.clientHeight > 0 ? cont.clientHeight : 400;
+        const cardLargura = card.offsetWidth;
+        const cardAltura = card.offsetHeight;
+
+        let left = parseFloat(card.style.left || '0');
+        let top = parseFloat(card.style.top || '0');
+
+        const maxLeft = Math.max(0, areaLargura - cardLargura - espacamento);
+        const maxTop = Math.max(0, areaAltura - cardAltura - espacamento);
+
+        left = Math.min(Math.max(left, 0), maxLeft);
+        top = Math.min(Math.max(top, 0), maxTop);
+
+        card.style.left = left + 'px';
+        card.style.top = top + 'px';
+    }
+
+    function obterProximaPosicao() {
+        const cards = Array.from(cont.querySelectorAll('.card-foto'));
+        const cardBase = 270;
+        const colunas = Math.max(1, Math.floor((cont.clientWidth - espacamento) / (cardBase + espacamento)));
+        const indice = cards.length;
+        const coluna = indice % colunas;
+        const linha = Math.floor(indice / colunas);
+
+        return {
+            left: coluna * (cardBase + espacamento),
+            top: linha * 190
+        };
+    }
+
+    function ativarArraste(card) {
+        let arrastando = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        card.addEventListener('mousedown', function(event) {
+            if (event.target.closest('input[type="range"]') || event.target.closest('.btn-remove')) return;
+
+            arrastando = true;
+            selecionarElemento(card);
+
+            const rect = card.getBoundingClientRect();
+            offsetX = event.clientX - rect.left;
+            offsetY = event.clientY - rect.top;
+
+            event.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(event) {
+            if (!arrastando) return;
+
+            const contRect = cont.getBoundingClientRect();
+            let novoLeft = event.clientX - contRect.left - offsetX;
+            let novoTop = event.clientY - contRect.top - offsetY;
+
+            const maxLeft = Math.max(0, cont.clientWidth - card.offsetWidth - espacamento);
+            const maxTop = Math.max(0, (cont.clientHeight > 0 ? cont.clientHeight : 400) - card.offsetHeight - espacamento);
+
+            novoLeft = Math.min(Math.max(novoLeft, 0), maxLeft);
+            novoTop = Math.min(Math.max(novoTop, 0), maxTop);
+
+            card.style.left = novoLeft + 'px';
+            card.style.top = novoTop + 'px';
+        });
+
+        document.addEventListener('mouseup', function() {
+            arrastando = false;
+        });
+    }
+
+    Array.from(input.files).forEach(file => {
+        const reader = new FileReader();
+
+        reader.onload = e => {
+            const div = document.createElement('div');
+            const pos = obterProximaPosicao();
+
+            div.className = 'card-foto';
+            div.tabIndex = 0;
+            div.style.position = 'absolute';
+            div.style.left = pos.left + 'px';
+            div.style.top = pos.top + 'px';
+            div.style.zIndex = String(cont.querySelectorAll('.card-foto').length + 1);
+            div.onclick = function(event) {
+                event.stopPropagation();
+                selecionarElemento(this);
+            };
+
+            div.innerHTML = `
+                <button class="btn-remove no-print" onclick="event.stopPropagation(); this.parentElement.remove()">X</button>
+                <img src="${e.target.result}">
+                <input type="range" min="30" max="100" value="100" class="no-print" style="width:100%; margin-top:5px;">
+            `;
+
+            cont.appendChild(div);
+
+            const img = div.querySelector('img');
+            const range = div.querySelector('input[type="range"]');
+
+            function aplicarLimite(percentual) {
+                const larguraDisponivel = cont.clientWidth - 16;
+                const alturaDisponivel = cont.clientHeight > 0 ? cont.clientHeight - 16 : 400;
+
+                const larguraNatural = img.naturalWidth || 1;
+                const alturaNatural = img.naturalHeight || 1;
+
+                const escalaMaxima = Math.min(
+                    larguraDisponivel / larguraNatural,
+                    alturaDisponivel / alturaNatural,
+                    1
+                );
+
+                const escalaFinal = escalaMaxima * (percentual / 100);
+
+                img.style.width = (larguraNatural * escalaFinal) + 'px';
+                img.style.height = (alturaNatural * escalaFinal) + 'px';
+
+                requestAnimationFrame(() => limitarPosicao(div));
+            }
+
+            img.onload = function() {
+                aplicarLimite(100);
+                limitarPosicao(div);
+            };
+
+            range.addEventListener('input', function(event) {
+                event.stopPropagation();
+                aplicarLimite(parseInt(this.value, 10) || 100);
+            });
+
+            ativarArraste(div);
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+    input.value = '';
+}
+
+function sincronizarObsGeraisPrint() {
+    const campo = document.getElementById('obsGerais');
+    const printBox = document.getElementById('obsGeraisPrint');
+    if (!campo || !printBox) return;
+
+    printBox.textContent = campo.value || '';
+
+    const estilos = window.getComputedStyle(campo);
+    printBox.style.height = campo.offsetHeight + 'px';
+    printBox.style.fontSize = estilos.fontSize;
+    printBox.style.lineHeight = estilos.lineHeight;
+    printBox.style.padding = estilos.padding;
+    printBox.style.border = estilos.border;
+    printBox.style.background = estilos.backgroundColor;
+    printBox.style.margin = estilos.margin;
+    printBox.style.fontFamily = estilos.fontFamily;
+    printBox.style.fontWeight = estilos.fontWeight;
+    printBox.style.letterSpacing = estilos.letterSpacing;}
+
+function prepararElementosParaPDF() {
+    document.body.classList.add('pdf-export');
+}
+
+function restaurarElementosDoPDF() {
+    document.body.classList.remove('pdf-export');
+}
+
+
+function salvarPDF() {
+    converterTudoParaMaiusculoNoPDF();
+    atualizarExibicao();
+
+    const pedidoInput = document.getElementById('dataPedido');
+    const entregaInput = document.getElementById('dataEntrega');
+    const pedidoTexto = document.getElementById('dispPedido');
+    const entregaTexto = document.getElementById('dispEntrega');
+
+    pedidoTexto.innerText = formatarBR(pedidoInput.value);
+    entregaTexto.innerText = formatarBR(entregaInput.value);
+
+    sincronizarObsGeraisPrint();
+
+    if (elementoSelecionado) elementoSelecionado.style.outline = "none";
+
+    const el = document.getElementById('totalPage');
+    const campo = document.getElementById('obsGerais');
+    const printBox = document.getElementById('obsGeraisPrint');
+
+    campo.style.display = 'none';
+    printBox.style.display = 'block';
+
+    pedidoInput.style.display = 'none';
+    entregaInput.style.display = 'none';
+    pedidoTexto.style.display = 'block';
+    entregaTexto.style.display = 'block';
+
+    prepararElementosParaPDF();
+
+    html2pdf().set({
+        margin: 0,
+        filename: 'ORDEM DE PRODUÇÃO VTR.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(el).save().then(() => {
+        restaurarElementosDoPDF();
+        printBox.style.display = 'none';
+        campo.style.display = 'block';
+        pedidoInput.style.display = 'block';
+        entregaInput.style.display = 'block';
+        pedidoTexto.style.display = '';
+        entregaTexto.style.display = '';
+    }).catch(() => {
+        restaurarElementosDoPDF();
+        printBox.style.display = 'none';
+        campo.style.display = 'block';
+        pedidoInput.style.display = 'block';
+        entregaInput.style.display = 'block';
+        pedidoTexto.style.display = '';
+        entregaTexto.style.display = '';
+    });
+}
+function limitarObsGerais() {
+    const campo = document.getElementById('obsGerais');
+    if (!campo) return;
+
+    let texto = campo.value.replace(/\r/g, '');
+
+    campo.value = texto;
+
+    while (campo.scrollHeight > campo.clientHeight && campo.value.length > 0) {
+        campo.value = campo.value.slice(0, -1);
+    }
+
+    sincronizarObsGeraisPrint();
+}
+
+document.addEventListener('input', function(e) {
+    if (e.target && e.target.id === 'obsGerais') {
+        limitarObsGerais();
+    }
+});
+
+
+function forcarMaiusculoSempre() {
+    const campos = document.querySelectorAll('input[type="text"], textarea, select');
+
+    campos.forEach(campo => {
+        if (!campo) return;
+
+        // aplica no valor atual
+        if (typeof campo.value === 'string') {
+            campo.value = campo.value.toUpperCase();
+        }
+
+        // aplica enquanto digita
+        campo.addEventListener('input', function() {
+            const inicio = this.selectionStart;
+            const fim = this.selectionEnd;
+            this.value = this.value.toUpperCase();
+            if (typeof inicio === 'number' && typeof fim === 'number') {
+                this.setSelectionRange(inicio, fim);
+            }
+        });
+
+        // aplica ao mudar/pre-selecionar
+        campo.addEventListener('change', function() {
+            this.value = this.value.toUpperCase();
+        });
+
+        // aplica ao colar
+        campo.addEventListener('blur', function() {
+            this.value = this.value.toUpperCase();
+        });
+    });
+}
+
+function converterTudoParaMaiusculoNoPDF() {
+    const campos = document.querySelectorAll('input[type="text"], textarea, select');
+    campos.forEach(campo => {
+        if (typeof campo.value === 'string') {
+            campo.value = campo.value.toUpperCase();
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', forcarMaiusculoSempre);
+
+
+</script>
+</body>
+</html>
