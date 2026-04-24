@@ -924,13 +924,17 @@ async function carregarDadosUsuario() {
 
         const dados = snap.data();
 
-        // campo vendedor
+        // vendedor → somente nome
         const campoVendedor = document.querySelectorAll(".cv-row input")[1];
-        campoVendedor.value = `${dados.usuario} - ${dados.codigo}`;
+        campoVendedor.value = dados.usuario || "";
 
-        // número da ordem
+        // número da ordem → código + sequência
         const campoOrdem = document.querySelector(".info-box-new input");
-        campoOrdem.value = dados.sequencia || "0001";
+
+        const codigo = dados.codigo || "";
+        const sequencia = dados.sequencia || "0001";
+
+        campoOrdem.value = `${codigo}${sequencia}`;
 
     } catch (error) {
         console.log(error);
@@ -950,16 +954,18 @@ async function atualizarSequenciaPedido() {
 
     const dados = snap.data();
 
+    const codigo = dados.codigo || "";
+
     let atual = parseInt(dados.sequencia || "0000");
     let proximo = atual + 1;
 
-    let novoNumero = String(proximo).padStart(4, "0");
+    let novaSequencia = String(proximo).padStart(4, "0");
 
     await updateDoc(ref, {
-        sequencia: novoNumero
+        sequencia: novaSequencia
     });
 
-    return novoNumero;
+    return `${codigo}${novaSequencia}`;
 }
 
 
@@ -983,20 +989,25 @@ document.addEventListener("DOMContentLoaded", () => {
 const salvarPDFAntigo = salvarPDF;
 
 window.salvarPDF = async function () {
+    // pega número atual que está na tela
+    const campoOrdem = document.querySelector(".info-box-new input");
+    const numeroAtual = campoOrdem.value;
+
+    // salva pedido com número atual
     await salvarNoBanco();
 
+    // gera PDF com número atual
+    salvarPDFAntigo();
+
+    // depois incrementa para o próximo
     const novoNumero = await atualizarSequenciaPedido();
 
     if (novoNumero) {
-        const campoOrdem = document.querySelector(".info-box-new input");
         campoOrdem.value = novoNumero;
     }
 
     calcularDatas();
-
-    salvarPDFAntigo();
 };
-	
 window.gerenciarCliquePunho = gerenciarCliquePunho;
 window.removePunho = removePunho;
 window.verificarDelete = verificarDelete;
