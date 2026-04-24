@@ -989,17 +989,67 @@ document.addEventListener("DOMContentLoaded", () => {
 const salvarPDFAntigo = salvarPDF;
 
 window.salvarPDF = async function () {
-    // pega número atual que está na tela
     const campoOrdem = document.querySelector(".info-box-new input");
-    const numeroAtual = campoOrdem.value;
 
-    // salva pedido com número atual
+    // 1. salva no banco com o número atual
     await salvarNoBanco();
 
-    // gera PDF com número atual
-    salvarPDFAntigo();
+    // 2. gera o PDF
+    converterTudoParaMaiusculoNoPDF();
+    atualizarExibicao();
 
-    // depois incrementa para o próximo
+    const pedidoInput = document.getElementById("dataPedido");
+    const entregaInput = document.getElementById("dataEntrega");
+    const pedidoTexto = document.getElementById("dispPedido");
+    const entregaTexto = document.getElementById("dispEntrega");
+
+    pedidoTexto.innerText = formatarBR(pedidoInput.value);
+    entregaTexto.innerText = formatarBR(entregaInput.value);
+
+    sincronizarObsGeraisPrint();
+
+    if (elementoSelecionado) {
+        elementoSelecionado.style.outline = "none";
+    }
+
+    const el = document.getElementById("totalPage");
+    const campo = document.getElementById("obsGerais");
+    const printBox = document.getElementById("obsGeraisPrint");
+
+    campo.style.display = "none";
+    printBox.style.display = "block";
+
+    pedidoInput.style.display = "none";
+    entregaInput.style.display = "none";
+    pedidoTexto.style.display = "block";
+    entregaTexto.style.display = "block";
+
+    prepararElementosParaPDF();
+
+    await html2pdf().set({
+        margin: 0,
+        filename: "ORDEM DE PRODUÇÃO VTR.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: {
+            unit: "mm",
+            format: "a4",
+            orientation: "portrait"
+        }
+    }).from(el).save();
+
+    restaurarElementosDoPDF();
+
+    printBox.style.display = "none";
+    campo.style.display = "block";
+
+    pedidoInput.style.display = "block";
+    entregaInput.style.display = "block";
+
+    pedidoTexto.style.display = "";
+    entregaTexto.style.display = "";
+
+    // 3. incrementa sequência depois do PDF
     const novoNumero = await atualizarSequenciaPedido();
 
     if (novoNumero) {
@@ -1008,6 +1058,7 @@ window.salvarPDF = async function () {
 
     calcularDatas();
 };
+
 window.gerenciarCliquePunho = gerenciarCliquePunho;
 window.removePunho = removePunho;
 window.verificarDelete = verificarDelete;
