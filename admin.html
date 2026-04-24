@@ -293,11 +293,23 @@ window.bloquearUsuario = async function (uid) {
         alert("Usuário bloqueado com sucesso");
         buscarUsuario();
 
-    } catch (error) {
-        console.log(error);
-        alert("Erro ao bloquear usuário");
+  } catch (error) {
+    console.log(error);
+
+    let msg = "Erro ao cadastrar usuário";
+
+    if (error.code === "auth/email-already-in-use") {
+        msg = "Este email já está em uso. Tente outro ou redefina a senha.";
+    } else if (error.code === "auth/invalid-email") {
+        msg = "O email digitado não é válido.";
+    } else if (error.code === "auth/weak-password") {
+        msg = "A senha precisa ter pelo menos 6 caracteres.";
+    } else if (error.code === "auth/invalid-credential") {
+        msg = "Credenciais inválidas, verifique seus dados.";
     }
-};
+
+    alert(msg);
+}
 
 /* LOGOUT */
 
