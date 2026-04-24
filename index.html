@@ -109,7 +109,7 @@ window.login = async function () {
         if (usuario === "ADMIN") {
             await signInWithEmailAndPassword(
                 auth,
-                "admin@vettor.com",
+                "vtrsportsdados@gmail.com",
                 senha
             );
 
@@ -135,6 +135,13 @@ window.login = async function () {
 
         // LOGIN COM EMAIL REAL + SENHA
         await signInWithEmailAndPassword(auth, email, senha);
+
+        // VERIFICA SE É PRIMEIRO ACESSO
+       if (dadosUsuario.senhaProvisoria === true) {
+       alert("Primeiro acesso detectado. Você precisa trocar sua senha.");
+       window.location.href = "trocar-senha.html";
+       return;
+       }
 
         // SALVA DADOS PARA USAR NO FORMULÁRIO
         localStorage.setItem("uid", querySnapshot.docs[0].id);
@@ -166,7 +173,7 @@ window.esqueciSenha = async function () {
     try {
         // ADMIN
         if (usuario === "ADMIN") {
-            await sendPasswordResetEmail(auth, "admin@vettor.com");
+            await sendPasswordResetEmail(auth, "vtrsportsdados@gmail.com");
             alert("Email de recuperação enviado");
             return;
         }
