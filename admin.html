@@ -70,7 +70,23 @@ button {
         <option value="inativo">INATIVO</option>
     </select>
 
-    <button onclick="cadastrarUsuario()">CADASTRAR USUÁRIO</button>
+    <button onclick="cadastrarUsuario()">CADASTTRAR USUÁRIO</button>
+
+    <hr style="margin:20px 0;">
+
+    <h3>BUSCAR USUÁRIO</h3>
+
+    <input
+        type="text"
+        id="buscarUsuario"
+        placeholder="Digite nome do usuário"
+    >
+
+    <button onclick="buscarUsuario()">
+        Buscar
+    </button>
+
+    <div id="resultadoUsuario"></div>
 
     <button class="logout" onclick="logout()">SAIR</button>
 </div>
@@ -163,6 +179,274 @@ window.cadastrarUsuario = async function () {
     alert("Erro: " + error.message);
 }
 };
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Painel Admin - VETTOR</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f5f5f5;
+    padding: 30px;
+}
+
+.box {
+    background: white;
+    padding: 25px;
+    max-width: 700px;
+    margin: auto;
+    border-radius: 10px;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 12px;
+    width: 100%;
+    border: none;
+    background: #00A859;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.logout {
+    background: #d9534f;
+    margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>PAINEL ADMIN</h2>
+
+    <input type="text" id="nome" placeholder="Nome completo">
+    <input type="text" id="usuario" placeholder="Usuário login">
+    <input type="text" id="codigo" placeholder="Código vendedor">
+    <input type="email" id="email" placeholder="Email recuperação">
+    <input type="password" id="senha" placeholder="Senha provisória">
+
+    <input type="text" id="sequencia" placeholder="Número inicial pedido (ex: 0084)">
+
+    <select id="tipo">
+        <option value="vendedor">VENDEDOR</option>
+        <option value="admin">ADMIN</option>
+    </select>
+
+    <select id="status">
+        <option value="ativo">ATIVO</option>
+        <option value="inativo">INATIVO</option>
+    </select>
+
+    <button onclick="cadastrarUsuario()">CADASTTRAR USUÁRIO</button>
+
+    <hr style="margin:20px 0;">
+
+    <h3>BUSCAR USUÁRIO</h3>
+
+    <input
+        type="text"
+        id="buscarUsuario"
+        placeholder="Digite nome do usuário"
+    >
+
+    <button onclick="buscarUsuario()">
+        Buscar
+    </button>
+
+    <div id="resultadoUsuario"></div>
+
+    <button class="logout" onclick="logout()">SAIR</button>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signOut,
+    signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+    getFirestore,
+    doc,
+    setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC0YaL9Fb9Z7gmUvvCP9KekLyBpTmaAHhQ",
+  authDomain: "vettor-app.firebaseapp.com",
+  projectId: "vettor-app",
+  storageBucket: "vettor-app.firebasestorage.app",
+  messagingSenderId: "833679689475",
+  appId: "1:833679689475:web:b7ceb62ce14ab9b9b28b36"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.cadastrarUsuario = async function () {
+
+    const nome = document.getElementById("nome").value.trim().toUpperCase();
+    const usuario = document.getElementById("usuario").value.trim().toUpperCase();
+    const codigo = document.getElementById("codigo").value.trim().toUpperCase();
+    const email = document.getElementById("email").value.trim().toLowerCase();
+    const senha = document.getElementById("senha").value;
+    const sequencia = document.getElementById("sequencia").value.trim();
+    const tipo = document.getElementById("tipo").value;
+    const status = document.getElementById("status").value;
+
+    if (!nome || !usuario || !codigo || !email || !senha || !sequencia) {
+        alert("Preencha todos os campos");
+        return;
+    }
+
+    try {
+
+        // CRIA LOGIN NO FIREBASE AUTH
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            senha
+        );
+
+        const uid = userCredential.user.uid;
+
+        // SALVA DADOS COMPLETOS NO FIRESTORE
+        await setDoc(doc(db, "usuarios", uid), {
+            nome: nome,
+            usuario: usuario,
+            codigo: codigo,
+            email: email,
+            sequencia: sequencia,
+            tipo: tipo,
+            status: status,
+            senhaProvisoria: true,
+            criadoEm: new Date()
+        });
+
+        // RELOGA O ADMIN
+        await signInWithEmailAndPassword(
+            auth,
+            "admin@vettor.com",
+            prompt("Digite novamente a senha do ADMIN para continuar:")
+        );
+
+        alert("Usuário cadastrado com sucesso");
+
+        document.querySelectorAll("input").forEach(input => {
+            input.value = "";
+        });
+
+} catch (error) {
+    console.log("ERRO FIREBASE:", error);
+    alert("Erro: " + error.message);
+}
+};
+
+
+
+/* ===== BUSCAR USUÁRIO ===== */
+
+window.buscarUsuario = async function () {
+    const nomeBusca = document
+        .getElementById("buscarUsuario")
+        .value
+        .trim()
+        .toUpperCase();
+
+    if (!nomeBusca) {
+        alert("Digite o nome do usuário");
+        return;
+    }
+
+    const resultado = document.getElementById("resultadoUsuario");
+    resultado.innerHTML = "Buscando...";
+
+    try {
+        const q = query(
+            collection(db, "usuarios"),
+            where("nome", ">=", nomeBusca),
+            where("nome", "<=", nomeBusca + "\uf8ff")
+        );
+
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+            resultado.innerHTML = "Usuário não encontrado";
+            return;
+        }
+
+        let html = "";
+
+        snapshot.forEach((docSnap) => {
+            const dados = docSnap.data();
+
+            html += `
+                <div style="border:1px solid #ccc; padding:15px; margin-top:10px;">
+                    <b>NOME:</b> ${dados.nome}<br>
+                    <b>USUÁRIO:</b> ${dados.usuario}<br>
+                    <b>CÓDIGO:</b> ${dados.codigo}<br>
+                    <b>EMAIL:</b> ${dados.email}<br>
+                    <b>STATUS:</b> ${dados.status}<br><br>
+
+                    <button onclick="bloquearUsuario('${docSnap.id}')">
+                        BLOQUEAR USUÁRIO
+                    </button>
+                </div>
+            `;
+        });
+
+        resultado.innerHTML = html;
+
+    } catch (error) {
+        console.log(error);
+        resultado.innerHTML = "Erro ao buscar usuário";
+    }
+};
+
+
+
+/* ===== BLOQUEAR USUÁRIO ===== */
+
+window.bloquearUsuario = async function (uid) {
+    const confirmar = confirm("Deseja realmente bloquear este usuário?");
+
+    if (!confirmar) return;
+
+    try {
+        await updateDoc(doc(db, "usuarios", uid), {
+            status: "inativo"
+        });
+
+        alert("Usuário bloqueado com sucesso");
+
+        buscarUsuario();
+
+    } catch (error) {
+        console.log(error);
+        alert("Erro ao bloquear usuário");
+    }
+};
+
+
 
 window.logout = function () {
     signOut(auth).then(() => {
